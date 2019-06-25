@@ -4,6 +4,7 @@ import { HostRouter, RoutingMap } from '../HostRouter';
 import { ClientToHost } from '../messages/ClientToHost';
 import { EnvData, LabeledStarted } from '../messages/Lifecycle';
 import { Publication } from '../messages/Publication';
+import { KeyEvent } from '../transformers/KeyboardEventTransformer';
 
 /** @external */
 const ROUTE_ATTR = 'route';
@@ -21,6 +22,7 @@ class FrameRouterElement extends HTMLElement {
   private _publishEmitter: InternalEventEmitter<Publication>;
   private _publishExposedEmitter: EventEmitter<Publication>;
   private _currentClientId: string;
+  private _filteredTopics: Map<string, (event: any) => boolean>;
 
   constructor() {
     super();
@@ -32,6 +34,8 @@ class FrameRouterElement extends HTMLElement {
     this._frameManager = new FrameManager({
       onMessage: this._handleClientMessages.bind(this)
     });
+
+    this._filteredTopics = new Map();
   }
 
   /**
@@ -100,6 +104,8 @@ class FrameRouterElement extends HTMLElement {
     if (this._router) {
       const clientInfo = this._router.getClientTarget(newPath);
       this._currentClientId = (clientInfo && clientInfo.id) || '';
+      this._filteredTopics =
+        (clientInfo && clientInfo.filteredTopics) || new Map();
       const newLocation = this._frameManager.setFrameLocation(
         clientInfo && clientInfo.url
       );
@@ -127,6 +133,12 @@ class FrameRouterElement extends HTMLElement {
       case 'publish':
         const publication: Publication = message.msg;
         publication.clientId = this._currentClientId;
+
+        const filter = this._filteredTopics.get(message.msg.topic);
+        if (filter && !filter(publication)) {
+          return;
+        }
+
         this._publishEmitter.dispatch(message.msg.topic, publication);
         break;
       case 'client_started':

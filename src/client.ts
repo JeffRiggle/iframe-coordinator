@@ -15,6 +15,7 @@ import {
 } from './messages/Lifecycle';
 import { Publication } from './messages/Publication';
 import { Toast } from './messages/Toast';
+import { transformKeyEvent } from './transformers/KeyboardEventTransformer';
 
 /**
  * Client configuration options.
@@ -111,6 +112,16 @@ export class Client {
     }
   };
 
+  private _onKeyDown = (event: KeyboardEvent) => {
+    this._sendToHost({
+      msgType: 'publish',
+      msg: {
+        topic: 'keydown.topic',
+        payload: transformKeyEvent(event)
+      }
+    });
+  };
+
   private _handleHostMessage(message: HostToClient): void {
     switch (message.msgType) {
       case 'publish':
@@ -156,6 +167,7 @@ export class Client {
 
     this._clientWindow.addEventListener('message', this._onWindowMessage);
     this._clientWindow.addEventListener('click', this._onWindowClick);
+    this._clientWindow.addEventListener('keydown', this._onKeyDown);
     this._sendToHost(Lifecycle.startedMessage);
   }
 
@@ -181,6 +193,7 @@ export class Client {
     this._isStarted = false;
     this._clientWindow.removeEventListener('message', this._onWindowMessage);
     this._clientWindow.removeEventListener('click', this._onWindowClick);
+    this._clientWindow.removeEventListener('keydown', this._onKeyDown);
   }
 
   /**

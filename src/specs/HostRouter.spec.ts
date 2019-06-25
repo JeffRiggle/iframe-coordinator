@@ -16,6 +16,13 @@ describe('HostRouter', () => {
       noClientHash: {
         url: 'http://example.com/my/pushstate/app/?query=works',
         assignedRoute: 'noHash'
+      },
+      routeWithFilter: {
+        url: clientUrl,
+        assignedRoute: 'route/filter',
+        filteredTopics: {
+          'keydown.topic': (event: any) => !event.payload.altPressed
+        }
       }
     });
   });
@@ -73,6 +80,29 @@ describe('HostRouter', () => {
         'http://example.com/my/pushstate/app/foo/bar?query=works'
       );
       expect(clientInfo.id).toBe('noClientHash');
+    });
+
+    it('should convert any filtered topics', () => {
+      const clientInfo = hostRouter.getClientTarget('route/filter');
+      if (!clientInfo || !clientInfo.filteredTopics) {
+        fail();
+        return;
+      }
+
+      const filter = clientInfo.filteredTopics.get('keydown.topic');
+
+      if (!filter) {
+        fail();
+        return;
+      }
+
+      expect(
+        filter({
+          payload: {
+            altPressed: true
+          }
+        })
+      ).toBe(false);
     });
   });
 });

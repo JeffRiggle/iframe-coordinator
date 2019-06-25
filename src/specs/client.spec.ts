@@ -186,6 +186,42 @@ describe('client', () => {
     });
   });
 
+  describe('when window has a key event', () => {
+    beforeEach(() => {
+      client.start();
+
+      mockFrameWindow.trigger('keydown', {
+        code: 'KeyA',
+        key: 'A',
+        keyCode: 65,
+        altKey: false,
+        ctrlKey: false,
+        metaKey: false
+      });
+    });
+
+    it('should publish a key event', () => {
+      expect(mockFrameWindow.parent.postMessage).toHaveBeenCalledWith(
+        {
+          msgType: 'publish',
+          msg: {
+            topic: 'keydown.topic',
+            payload: {
+              code: 'KeyA',
+              key: 'A',
+              keyCode: 65,
+              altKey: false,
+              ctrlKey: false,
+              metaKey: false
+            },
+            clientId: undefined
+          }
+        },
+        'https://example.com'
+      );
+    });
+  });
+
   describe('when window has a click event', () => {
     let mockElement;
     describe('when click event target is an anchor', () => {
