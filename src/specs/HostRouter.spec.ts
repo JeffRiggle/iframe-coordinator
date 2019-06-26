@@ -21,7 +21,16 @@ describe('HostRouter', () => {
         url: clientUrl,
         assignedRoute: 'route/filter',
         filteredTopics: {
-          'keydown.topic': (event: any) => !event.payload.altPressed
+          'keydown.topic': {
+            filters: [
+              {
+                property: 'altKeyPressed',
+                comparison: 0,
+                expected: 'false'
+              }
+            ],
+            junction: 'and'
+          }
         }
       }
     });
@@ -95,14 +104,6 @@ describe('HostRouter', () => {
         fail();
         return;
       }
-
-      expect(
-        filter({
-          payload: {
-            altPressed: true
-          }
-        })
-      ).toBe(false);
     });
   });
 });

@@ -191,7 +191,16 @@ describe('client', () => {
   describe('when window has a key event', () => {
     beforeEach(() => {
       const dataMap = new Map();
-      dataMap.set('keydown.topic', '(event) => !event.altKey');
+      dataMap.set('keydown.topic', {
+        filters: [
+          {
+            property: 'altKey',
+            comparison: 0,
+            expected: 'false'
+          }
+        ],
+        junction: 'and'
+      });
 
       const testEnvironmentData: EnvData = {
         locale: 'nl-NL',

@@ -5,14 +5,32 @@ module.exports = function(frameRouter) {
         url: 'http://localhost:8080/client-app-1/#/',
         assignedRoute: '/app1',
         filteredTopics: {
-          'keydown.topic': (event) => { return !event.altKey }
+          'keydown.topic': {
+            filters: [
+              {
+                property: 'altKey',
+                comparison: 0,
+                expected: 'false'
+              }
+            ],
+            junction: 'and'
+          }
         }
       },
       app2: {
         url: 'http://localhost:8080/client-app-2/#/',
         assignedRoute: '/app2',
         filteredTopics: {
-          'keydown.topic': (event) => { return !event.altKey }
+          'keydown.topic': {
+            filters: [
+              {
+                property: 'altKey',
+                comparison: 0,
+                expected: 'false'
+              }
+            ],
+            junction: 'and'
+          }
         }
       }
     },

@@ -1,4 +1,5 @@
 import { guard, mixed, object, string } from 'decoders';
+import { Filter } from '../filtering/Filter';
 import { LabeledMsg } from './LabeledMsg';
 import { createMessageValidator } from './validationUtils';
 
@@ -32,8 +33,8 @@ export interface EnvData {
   locale: string;
   /** Location of the host app */
   hostRootUrl: string;
-  /** Mapping of filtered topics */
-  filteredTopics: Map<string, string>;
+  /** Mapping of filtered */
+  filteredTopics: any;
   /** Extra host-specific details */
   custom?: any;
 }

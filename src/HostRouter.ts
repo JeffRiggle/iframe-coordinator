@@ -1,3 +1,5 @@
+import { Filter } from './filtering/Filter';
+
 // Main Class
 
 /**
@@ -51,7 +53,7 @@ export interface ClientTarget {
   /** The target URL to show */
   url: string | null;
   /** A filter for keyboard events */
-  filteredTopics?: Map<string, (event: any) => boolean>;
+  filteredTopics?: Map<string, Filter>;
 }
 
 /**
@@ -163,9 +165,7 @@ function applyRoute(urlStr: string, route: string): string {
  * who cares
  * @param filteredTopics whatever
  */
-function transformFilteredTopics(
-  filteredTopics: any
-): Map<string, (event: any) => boolean> {
+function transformFilteredTopics(filteredTopics: any): Map<string, Filter> {
   const retVal = new Map();
 
   if (!filteredTopics) {
@@ -175,6 +175,7 @@ function transformFilteredTopics(
   for (const topic of Object.keys(filteredTopics)) {
     retVal.set(topic, filteredTopics[topic]);
   }
+
   return retVal;
 }
 

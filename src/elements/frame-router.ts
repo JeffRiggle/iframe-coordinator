@@ -1,10 +1,10 @@
 import { EventEmitter, InternalEventEmitter } from '../EventEmitter';
+import { Filter } from '../filtering/Filter';
 import FrameManager from '../FrameManager';
 import { HostRouter, RoutingMap } from '../HostRouter';
 import { ClientToHost } from '../messages/ClientToHost';
 import { EnvData, LabeledStarted } from '../messages/Lifecycle';
 import { Publication } from '../messages/Publication';
-import { encodeFilters } from '../transformers/TopicFilters';
 
 /** @external */
 const ROUTE_ATTR = 'route';
@@ -22,7 +22,7 @@ class FrameRouterElement extends HTMLElement {
   private _publishEmitter: InternalEventEmitter<Publication>;
   private _publishExposedEmitter: EventEmitter<Publication>;
   private _currentClientId: string;
-  private _filteredTopics: Map<string, (event: any) => boolean>;
+  private _filteredTopics: Map<string, Filter>;
 
   constructor() {
     super();
@@ -107,7 +107,7 @@ class FrameRouterElement extends HTMLElement {
 
       this._filteredTopics =
         (clientInfo && clientInfo.filteredTopics) || new Map();
-      this._envData.filteredTopics = encodeFilters(this._filteredTopics);
+      this._envData.filteredTopics = this._filteredTopics;
 
       const newLocation = this._frameManager.setFrameLocation(
         clientInfo && clientInfo.url
@@ -136,12 +136,6 @@ class FrameRouterElement extends HTMLElement {
       case 'publish':
         const publication: Publication = message.msg;
         publication.clientId = this._currentClientId;
-
-        const filter = this._filteredTopics.get(message.msg.topic);
-        if (filter && !filter(publication)) {
-          return;
-        }
-
         this._publishEmitter.dispatch(message.msg.topic, publication);
         break;
       case 'client_started':
