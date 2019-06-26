@@ -4,7 +4,7 @@ import { HostRouter, RoutingMap } from '../HostRouter';
 import { ClientToHost } from '../messages/ClientToHost';
 import { EnvData, LabeledStarted } from '../messages/Lifecycle';
 import { Publication } from '../messages/Publication';
-import { KeyEvent } from '../transformers/KeyboardEventTransformer';
+import { encodeFilters } from '../transformers/TopicFilters';
 
 /** @external */
 const ROUTE_ATTR = 'route';
@@ -104,8 +104,11 @@ class FrameRouterElement extends HTMLElement {
     if (this._router) {
       const clientInfo = this._router.getClientTarget(newPath);
       this._currentClientId = (clientInfo && clientInfo.id) || '';
+
       this._filteredTopics =
         (clientInfo && clientInfo.filteredTopics) || new Map();
+      this._envData.filteredTopics = encodeFilters(this._filteredTopics);
+
       const newLocation = this._frameManager.setFrameLocation(
         clientInfo && clientInfo.url
       );

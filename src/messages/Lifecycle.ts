@@ -32,6 +32,8 @@ export interface EnvData {
   locale: string;
   /** Location of the host app */
   hostRootUrl: string;
+  /** Mapping of filtered topics */
+  filteredTopics: Map<string, string>;
   /** Extra host-specific details */
   custom?: any;
 }
@@ -53,6 +55,7 @@ const envDataDecoder = guard(
   object({
     locale: string,
     hostRootUrl: string,
+    filteredTopics: mixed,
     custom: mixed
   })
 );

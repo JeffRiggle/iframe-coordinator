@@ -16,6 +16,7 @@ import {
 import { Publication } from './messages/Publication';
 import { Toast } from './messages/Toast';
 import { transformKeyEvent } from './transformers/KeyboardEventTransformer';
+import { decodeFilters } from './transformers/TopicFilters';
 
 /**
  * Client configuration options.
@@ -33,6 +34,7 @@ export class Client {
   private _isStarted: boolean;
   private _clientWindow: Window;
   private _environmentData: EnvData;
+  private _filteredTopics: Map<string, (event: any) => boolean>;
   private _envDataEmitter: InternalEventEmitter<EnvData>;
   private _hostOrigin: string;
   private _publishEmitter: InternalEventEmitter<Publication>;
@@ -113,11 +115,22 @@ export class Client {
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {
+    if (!this._filteredTopics) {
+      return;
+    }
+
+    const filter = this._filteredTopics.get('keydown.topic');
+    const keyData = transformKeyEvent(event);
+
+    if (!filter || !filter(keyData)) {
+      return;
+    }
+
     this._sendToHost({
       msgType: 'publish',
       msg: {
         topic: 'keydown.topic',
-        payload: transformKeyEvent(event)
+        payload: keyData
       }
     });
   };
@@ -130,6 +143,7 @@ export class Client {
       case 'env_init':
         const envInitMsg: LabeledEnvInit = message as LabeledEnvInit;
         this._environmentData = envInitMsg.msg;
+        this._filteredTopics = decodeFilters(envInitMsg.msg.filteredTopics);
         this._envDataEmitter.dispatch(
           'environmentalData',
           this._environmentData
